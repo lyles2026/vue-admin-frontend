@@ -1,19 +1,14 @@
 <script setup>
 import RegisterPage from '@/components/Common/registerPage.vue';
 import { useRouter } from 'vue-router'
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 const loading = ref(false)
 const router = useRouter()
-
-const form = reactive({
-    username: '',
-    password: ''
-})
-
+const { form } = authStore
 
 
 const rules = {
