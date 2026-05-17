@@ -8,7 +8,16 @@ const router = createRouter({
       name: 'home',
       component: () => import('@/views/Home/DashboardView.vue'),
       meta: { title: '后台面板' },
-    }
+      children: [
+
+      ]
+    },
+     {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/Common/LoginView.vue'),
+      meta: { title: '登录' }
+    },
   ],
 })
 
