@@ -10,7 +10,19 @@ const router = createRouter({
       component: () => import('@/views/Home/DashboardView.vue'),
       meta: { title: '后台面板' },
       children: [
-
+        {
+          path: '/',
+          name: 'dashboard',
+          component: () => import('@/views/Home/HomeView.vue'),
+          meta: { title: '后台面板' }
+        },
+        // 商品管理
+        {
+          path: '/Goods/shop',
+          name: 'goods-shop',
+          component: () => import('@/views/Shop/ShopView.vue'),
+          meta: { title: '商品管理' }
+        },
       ]
     },
     {
