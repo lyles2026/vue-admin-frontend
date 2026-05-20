@@ -1,5 +1,100 @@
 <script setup>
+import { useCommonStore } from '@/stores/common.js';
+import { getShopList } from '@/api/static.js';
+import DialogBox from '@/components/Common/DialogBox.vue'
+import { ref, onMounted } from 'vue';
+import { getShop, addShop, deleteShop, updateShop } from '@/api/shop';
+import ShopList from '@/components/Common/ShopList.vue';
 
+const commonStore = useCommonStore()
+
+const { searchForm } = commonStore
+
+const goodsList = ref([])
+const loading = ref(false)
+
+// 调用接口
+const fetchGoods = async () => {
+    loading.value = true
+    try {
+        const res = await getShop()
+        goodsList.value = res.data.data.map((item, index) => ({
+            ...item,
+            id: index + 1
+        }))
+        console.log(goodsList.value);
+
+    } finally {
+        loading.value = false
+    }
+}
+
+onMounted(() => fetchGoods())
+
+
+const selectedRows = ref([])
+
+const handleConfirm = async (form) => {
+    const now = new Date()
+    form.createTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    if (dialogType.value === 'add') {
+        await addShop(form)
+    } else {
+        await updateShop(currentRow.value._id, form)
+    }
+    fetchGoods()
+}
+
+const open = ref(false)
+const handleAdd = () => {
+    dialogType.value = 'add'
+    currentRow.value = {}
+    open.value = true
+}
+
+const shopCategory = ref([])
+const shopStatus = ref([])
+
+onMounted(async () => {
+    const res = await getShopList()
+    shopCategory.value = res.data.data.shopCategory
+    shopStatus.value = res.data.data.shopStatus
+})
+
+const rules = {
+    name: [
+        { required: true, message: '请输入商品名称', trigger: 'blur' },
+        { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+    ],
+    category: [
+        { required: true, message: '请选择分类', trigger: 'change' },
+    ],
+    price: [
+        { required: true, message: '请输入价格', trigger: 'blur' },
+        { pattern: /^\d+(\.\d{1,2})?$/, message: '请输入有效的价格', trigger: 'blur' }
+    ],
+    stock: [
+        { required: true, message: '请输入库存', trigger: 'blur' },
+        { pattern: /^\d+$/, message: '库存必须是整数', trigger: 'blur' }
+    ],
+    status: [
+        { required: true, message: '请选择状态', trigger: 'change' },]
+}
+
+const handleDelete = async (row) => {
+
+    await deleteShop(row._id)
+    fetchGoods()
+}
+
+const handleEdit = (row) => {
+    dialogType.value = 'edit'
+    currentRow.value = { ...row }
+    open.value = true
+}
+
+const dialogType = ref('add')
+const currentRow = ref({})
 </script>
 
 <template>
@@ -12,16 +107,12 @@
                 </el-form-item>
                 <el-form-item label="商品分类">
                     <el-select v-model="searchForm.category" placeholder="请选择分类" clearable>
-                        <el-option label="手机数码" value="phone" />
-                        <el-option label="电脑办公" value="computer" />
-                        <el-option label="平板电脑" value="tablet" />
-                        <el-option label="智能穿戴" value="wearable" />
+                        <el-option v-for="item in shopCategory" :key="item.value" :value="item.name" />
                     </el-select>
                 </el-form-item>
                 <el-form-item label="状态">
                     <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
-                        <el-option label="销售中" value="onsale" />
-                        <el-option label="已下架" value="offsale" />
+                        <el-option v-for="item in shopStatus" :key="item.value" :value="item.name" />
                     </el-select>
                 </el-form-item>
                 <el-form-item>
@@ -40,39 +131,35 @@
                 </div>
             </template>
 
-            <el-table :data="goodsList" stripe v-loading="false" @selection-change="selectedRows = $event">
-                <el-table-column type="selection" width="55" />
-                <el-table-column prop="id" label="ID" width="80" />
-                <el-table-column prop="name" label="商品名称" min-width="150" />
-                <el-table-column prop="category" label="分类" width="120" />
-                <el-table-column prop="price" label="价格" width="120">
-                    <template #default="{ row }">
-                        <span style="color: #f56c6c;">¥{{ row.price }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="stock" label="库存" width="100" />
-                <el-table-column prop="status" label="状态" width="100">
-                    <template #default="{ row }">
-                        <el-tag :type="row.status === '销售中' ? 'success' : 'info'">{{ row.status }}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="createTime" label="创建时间" width="180" />
-                <el-table-column label="操作" width="150" fixed="right">
-                    <template #default="{ row }">
-                        <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-                        <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-
-            <!-- 分页 -->
-            <div class="pagination">
-                <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="total"
-                    :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
-                    @size-change="handleSizeChange" @current-change="handleCurrentChange" />
-            </div>
+            <ShopList :goods-list="goodsList" @selection-change="selectedRows = $event">
+                <template #columns>
+                    <el-table-column type="selection" width="55" />
+                    <el-table-column prop="id" label="ID" width="80" />
+                    <el-table-column prop="name" label="商品名称" min-width="150" />
+                    <el-table-column prop="category" label="分类" width="120" />
+                    <el-table-column prop="price" label="价格" width="120">
+                        <template #default="{ row }">
+                            <span style="color: #f56c6c;">¥{{ row.price }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="stock" label="库存" width="100" />
+                    <el-table-column prop="status" label="状态" width="100">
+                        <template #default="{ row }">
+                            <el-tag :type="row.status === '销售中' ? 'success' : 'info'">{{ row.status }}</el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="createTime" label="创建时间" width="180" />
+                    <el-table-column label="操作" width="150" fixed="right">
+                        <template #default="{ row }">
+                            <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+                            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+                        </template>
+                    </el-table-column>
+                </template>
+            </ShopList>
         </el-card>
-         <DialogBox @confirm="handleConfirm" :fields="fields" :visible="open" @update:visible="open = $event" />
+        <DialogBox :type="dialogType" :formData="currentRow" :rules="rules" @confirm="handleConfirm"
+            :shopCategory="shopCategory" :shopStatus="shopStatus" :visible="open" @update:visible="open = $event" />
     </div>
 </template>
 

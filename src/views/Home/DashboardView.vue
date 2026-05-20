@@ -6,7 +6,7 @@ import { ElMessage } from 'element-plus'
 import ConfirmDialog from '@/components/Common/ConfirmDialog.vue';
 import HeaderMenu from '@/components/Home/HeaderMenu.vue'
 import SidebarMenu from '@/components/Home/SidebarMenu.vue'
-import { getMenuList } from '@/api/menu.js'
+import { getMenuList } from '@/api/static.js'
 
 
 const menuList = ref([])
