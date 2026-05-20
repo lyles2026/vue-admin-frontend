@@ -1,14 +1,46 @@
 <script setup>
-import { useCommonStore } from '@/stores/common.js';
 import { getShopList } from '@/api/static.js';
 import DialogBox from '@/components/Common/DialogBox.vue'
 import { ref, onMounted } from 'vue';
 import { getShop, addShop, deleteShop, updateShop } from '@/api/shop';
 import ShopList from '@/components/Common/ShopList.vue';
 
-const commonStore = useCommonStore()
 
-const { searchForm } = commonStore
+
+
+const searchForm = ref({
+    name: '',
+    category: '',
+    status: ''
+})
+const handleSearch = async () => {
+
+    try {
+        const res = await getShop()
+
+        const searchResult = res.data.data.filter(item => {
+            const matchName = !searchForm.value.name || item.name.includes(searchForm.value.name)
+            const matchCategory = !searchForm.value.category || item.category === searchForm.value.category
+            const matchStatus = !searchForm.value.status || item.status === searchForm.value.status
+            return matchName && matchCategory && matchStatus
+        })
+        goodsList.value = searchResult.map((item, index) => ({
+            ...item,
+            id: index + 1
+        }))
+
+    } catch (err) {
+        console.error('搜索失败:', err)
+    }
+
+}
+
+const handleReset = () => {
+    searchForm.value.name = ''
+    searchForm.value.category = ''
+    searchForm.value.status = ''
+    handleSearch()
+}
 
 const goodsList = ref([])
 const loading = ref(false)
@@ -22,7 +54,6 @@ const fetchGoods = async () => {
             ...item,
             id: index + 1
         }))
-        console.log(goodsList.value);
 
     } finally {
         loading.value = false
@@ -64,7 +95,7 @@ onMounted(async () => {
 const rules = {
     name: [
         { required: true, message: '请输入商品名称', trigger: 'blur' },
-        { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+        { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'blur' }
     ],
     category: [
         { required: true, message: '请选择分类', trigger: 'change' },
