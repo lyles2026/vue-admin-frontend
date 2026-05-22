@@ -68,6 +68,13 @@ watch(() => props.formData, (val) => {
                     <el-option v-for="status in shopStatus" :key="status.value" :label="status.name"
                         :value="status.name" />
                 </el-select>
+                <template v-else-if="item.id === 4">
+                    <el-date-picker v-model="form.startTime" type="datetime" placeholder="开始时间"
+                        value-format="YYYY-MM-DD HH:mm:ss" />
+                    <span style="margin: 0 10px;">至</span>
+                    <el-date-picker v-model="form.endTime" type="datetime" placeholder="结束时间"
+                        value-format="YYYY-MM-DD HH:mm:ss" />
+                </template>
             </el-form-item>
         </el-form>
         <template #footer>

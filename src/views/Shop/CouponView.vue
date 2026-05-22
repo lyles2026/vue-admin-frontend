@@ -1,0 +1,126 @@
+<script setup>
+import { ref, onMounted } from 'vue'
+import { getCoupon, addCoupon, updateCoupon, deleteCoupon } from '@/api/coupon'
+import DialogBox from '@/components/Common/DialogBox.vue'
+
+// 优惠券列表
+const couponList = ref([])
+const loading = ref(false)
+
+const fetchCoupons = async () => {
+    try {
+        const res = await getCoupon()
+        couponList.value = res.data.data.map((item, index) => ({
+            ...item,
+            id: index + 1
+        }))
+    } finally {
+        loading.value = false
+    }
+}
+onMounted(() => fetchCoupons())
+
+const open = ref(false)
+const dialogTitle = ref('新增优惠券')
+
+const dialogType = ref('add')
+const currentRow = ref({})
+
+const handleAdd = () => {
+    dialogTitle.value = '新增优惠券'
+    dialogType.value = 'add'
+    currentRow.value = {}
+    open.value = true
+}
+
+const handleEdit = (row) => {
+    dialogTitle.value = '编辑优惠券'
+    currentRow.value = { ...row }
+    dialogType.value = 'edit'
+    open.value = true
+}
+
+const handleDelete = async (row) => {
+    await deleteCoupon(row._id)
+    fetchCoupons()
+}
+
+const handleSubmit = async (form) => {
+    const formData = { ...form }
+    // 根据日期自动计算状态
+    const now = new Date()
+    const start = new Date(formData.startTime)
+    const end = new Date(formData.endTime)
+    if (now < start) formData.status = '未开始'
+    else if (now > end) formData.status = '已结束'
+    else formData.status = '进行中'
+
+    if (dialogType.value === 'add') {
+        formData.receiveCount = 0
+        await addCoupon(formData)
+    } else {
+        await updateCoupon(currentRow.value._id, formData)
+    }
+    open.value = false
+    fetchCoupons()
+}
+
+const List = [
+    { name: 'name', label: '优惠券名称' },
+    { name: 'type', label: '类型' },
+    { name: 'value', label: '优惠内容' },
+    { id: 4, name: 'validity', label: '有效期' },
+]
+</script>
+
+
+<template>
+    <div class="page-container">
+        <el-card shadow="never">
+            <template #header>
+                <div class="card-header">
+                    <span>优惠券管理</span>
+                    <el-button type="primary" @click="handleAdd">新增优惠券</el-button>
+                </div>
+            </template>
+
+            <el-table :data="couponList" stripe>
+                <el-table-column prop="id" label="ID" width="80" />
+                <el-table-column prop="name" label="优惠券名称" />
+                <el-table-column prop="type" label="类型" width="100" />
+                <el-table-column prop="value" label="优惠内容" width="120" />
+                <el-table-column prop="startTime" label="开始时间" width="120" />
+                <el-table-column prop="endTime" label="结束时间" width="120" />
+                <el-table-column prop="status" label="状态" width="100">
+                    <template #default="{ row }">
+                        <el-tag :type="row.status === '进行中' ? 'success' : row.status === '未开始' ? 'warning' : 'info'">
+                            {{ row.status }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="receiveCount" label="领取人数" width="100" />
+                <el-table-column label="操作" width="150">
+                    <template #default="{ row }">
+                        <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+                        <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-card>
+
+        <DialogBox :visible="open" :List="List" :type="dialogType" :formData="currentRow" @confirm="handleSubmit"
+            @update:visible="open = $event" />
+    </div>
+</template>
+
+<style scoped>
+.page-container {
+    padding: 20px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+</style>

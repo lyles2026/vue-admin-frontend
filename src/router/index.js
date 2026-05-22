@@ -29,6 +29,18 @@ const router = createRouter({
           component: () => import('@/views/Shop/CategoryView.vue'),
           meta: { title: '分类管理' }
         },
+        {
+          path: '/Goods/size',
+          name: 'goods-size',
+          component: () => import('@/views/Shop/SizeView.vue'),
+          meta: { title: '规格管理' }
+        },
+        {
+          path: '/Goods/coupon',
+          name: 'goods-coupon',
+          component: () => import('@/views/Shop/CouponView.vue'),
+          meta: { title: '优惠卷管理' }
+        },
       ]
     },
     {
