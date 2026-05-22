@@ -11,6 +11,7 @@ const props = defineProps({
     rules: Object,
     type: String,
     formData: Object,
+    List: Array
 })
 
 
@@ -18,7 +19,13 @@ const props = defineProps({
 
 const emit = defineEmits(['update:visible', 'confirm'])
 
+const resetForm = () => {
+    Object.keys(form).forEach(key => delete form[key])
+    formRef.value?.clearValidate()
+}
+
 const handleCancel = () => {
+    resetForm()
     emit('update:visible', false)
 }
 const handeleConfirm = async () => {
@@ -26,16 +33,11 @@ const handeleConfirm = async () => {
     const valid = await formRef.value.validate().catch(() => false)
     if (!valid) return
     emit('confirm', form)
+    resetForm()
     emit('update:visible', false)
 }
 
-const List = [
-    { name: 'name', label: '商品名称' },
-    { id: 1, name: 'category', label: '分类' },
-    { name: 'price', label: '价格' },
-    { name: 'stock', label: '库存' },
-    { id: 2, name: 'status', label: '状态' },
-]
+
 
 const formRef = ref(null)
 
@@ -59,6 +61,10 @@ watch(() => props.formData, (val) => {
                         :value="category.name" />
                 </el-select>
                 <el-select v-else-if="item.id === 2" v-model="form[item.name]">
+                    <el-option v-for="status in shopStatus" :key="status.value" :label="status.name"
+                        :value="status.name" />
+                </el-select>
+                <el-select v-else-if="item.id === 3" v-model="form[item.name]">
                     <el-option v-for="status in shopStatus" :key="status.value" :label="status.name"
                         :value="status.name" />
                 </el-select>

@@ -3,6 +3,7 @@ import { getShopList } from '@/api/static.js';
 import DialogBox from '@/components/Common/DialogBox.vue'
 import { ref, onMounted } from 'vue';
 import { getShop, addShop, deleteShop, updateShop } from '@/api/shop';
+import { getCategory } from '@/api/category';
 import ShopList from '@/components/Common/ShopList.vue';
 
 
@@ -87,9 +88,13 @@ const shopCategory = ref([])
 const shopStatus = ref([])
 
 onMounted(async () => {
-    const res = await getShopList()
-    shopCategory.value = res.data.data.shopCategory
-    shopStatus.value = res.data.data.shopStatus
+    const [staticRes, catRes] = await Promise.all([getShopList(), getCategory()])
+    shopStatus.value = staticRes.data.data.shopStatus
+    const categories = catRes.data.data || []
+    shopCategory.value = categories.map(item => ({
+        name: item.name,
+        value: item._id
+    }))
 })
 
 const rules = {
@@ -126,6 +131,15 @@ const handleEdit = (row) => {
 
 const dialogType = ref('add')
 const currentRow = ref({})
+
+const List = [
+    { name: 'name', label: '商品名称' },
+    { id: 1, name: 'category', label: '分类' },
+    { name: 'price', label: '价格' },
+    { name: 'stock', label: '库存' },
+    { id: 2, name: 'status', label: '状态' },
+]
+
 </script>
 
 <template>
@@ -189,7 +203,7 @@ const currentRow = ref({})
                 </template>
             </ShopList>
         </el-card>
-        <DialogBox :type="dialogType" :formData="currentRow" :rules="rules" @confirm="handleConfirm"
+        <DialogBox :List="List" :type="dialogType" :formData="currentRow" :rules="rules" @confirm="handleConfirm"
             :shopCategory="shopCategory" :shopStatus="shopStatus" :visible="open" @update:visible="open = $event" />
     </div>
 </template>
