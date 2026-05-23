@@ -53,6 +53,42 @@ const router = createRouter({
           component: () => import('@/views/User/VipView.vue'),
           meta: { title: '会员等级' }
         },
+        {
+          path: '/Order/permissions',
+          name: 'order-permissions',
+          component: () => import('@/views/Order/OrderListView.vue'),
+          meta: { title: '订单列表' }
+        },
+        {
+          path: '/Order/sale',
+          name: 'order-sale',
+          component: () => import('@/views/Order/AfterSaleView.vue'),
+          meta: { title: '售后管理' }
+        },
+        {
+          path: '/Order/count',
+          name: 'order-count',
+          component: () => import('@/views/Order/OrderCountView.vue'),
+          meta: { title: '订单统计' }
+        },
+        {
+          path: '/Admin/admin',
+          name: 'admin-admin',
+          component: () => import('@/views/Admin/AdminView.vue'),
+          meta: { title: '管理员管理' }
+        },
+        {
+          path: '/Admin/permission',
+          name: 'admin-permission',
+          component: () => import('@/views/Admin/PermissionView.vue'),
+          meta: { title: '权限管理' }
+        },
+        {
+          path: '/Admin/role',
+          name: 'admin-role',
+          component: () => import('@/views/Admin/RoleView.vue'),
+          meta: { title: '角色管理' }
+        },
       ]
     },
     {
