@@ -41,6 +41,18 @@ const router = createRouter({
           component: () => import('@/views/Shop/CouponView.vue'),
           meta: { title: '优惠卷管理' }
         },
+        {
+          path: '/Users/user',
+          name: 'users-user',
+          component: () => import('@/views/User/UserView.vue'),
+          meta: { title: '用户管理' }
+        },
+        {
+          path: '/Users/vip',
+          name: 'users-vip',
+          component: () => import('@/views/User/VipView.vue'),
+          meta: { title: '会员等级' }
+        },
       ]
     },
     {

@@ -8,7 +8,7 @@ defineProps({
     showConfirmPassword: Boolean
 })
 
-const emit = defineEmits(['update:username', 'update:password', 'update:confirmpassword', 'submit'])
+const emit = defineEmits(['update:username', 'update:password', 'update:confirmpassword', 'update:phone', 'update:email', 'update:role', 'submit'])
 
 
 const formRef = ref(null)
@@ -27,7 +27,7 @@ defineExpose({ validate: handleSubmit })
 </script>
 
 <template>
-    <el-form style="width:400px; min-width: 400px;" :rules="rules"  :model="form">
+    <el-form style="width:400px; min-width: 400px;" :rules="rules" :model="form">
         <el-form-item prop="username">
             <el-input :prefix-icon="User" :model-value="form.username"
                 @update:model-value="$emit('update:username', $event)" placeholder="请输入用户名" size="large" />
@@ -41,6 +41,24 @@ defineExpose({ validate: handleSubmit })
         <el-form-item prop="confirmpassword" v-if="showConfirmPassword">
             <el-input :prefix-icon="Lock" :model-value="form.confirmpassword"
                 @update:model-value="$emit('update:confirmpassword', $event)" placeholder="请确认密码" size="large" />
+        </el-form-item>
+
+        <el-form-item prop="phone" v-if="showConfirmPassword">
+            <el-input :model-value="form.phone" @update:model-value="$emit('update:phone', $event)"
+                placeholder="手机号（选填）" size="large" />
+        </el-form-item>
+
+        <el-form-item prop="email" v-if="showConfirmPassword">
+            <el-input :model-value="form.email" @update:model-value="$emit('update:email', $event)" placeholder="邮箱（选填）"
+                size="large" />
+        </el-form-item>
+
+        <el-form-item prop="role" v-if="showConfirmPassword">
+            <el-select :model-value="form.role" @update:model-value="$emit('update:role', $event)" size="large"
+                style="width:100%">
+                <el-option label="普通用户" value="普通用户" />
+                <el-option label="管理员" value="管理员" />
+            </el-select>
         </el-form-item>
 
         <el-form-item>

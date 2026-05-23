@@ -8,10 +8,15 @@ const props = defineProps({
     visible: Boolean,
     shopCategory: Array,
     shopStatus: Array,
+    roleOptions: Array,
     rules: Object,
     type: String,
     formData: Object,
-    List: Array
+    List: Array,
+    title: {
+        type: String,
+        default: '选择商品规格'
+    }
 })
 
 
@@ -51,7 +56,7 @@ watch(() => props.formData, (val) => {
 </script>
 
 <template>
-    <el-dialog :model-value="visible" @update:model-value="$emit('update:visible', $event)" title="选择商品规格" width="500">
+    <el-dialog :model-value="visible" @update:model-value="$emit('update:visible', $event)" :title="title" width="500">
         <el-form :model="form" :rules="rules" ref="formRef">
             <el-form-item :label-width="formLabelWidth" v-for="item in List" :key="item.name" :label="item.label"
                 :prop="item.name">
@@ -75,6 +80,9 @@ watch(() => props.formData, (val) => {
                     <el-date-picker v-model="form.endTime" type="datetime" placeholder="结束时间"
                         value-format="YYYY-MM-DD HH:mm:ss" />
                 </template>
+                <el-select v-else-if="item.id === 5" v-model="form[item.name]">
+                    <el-option v-for="role in roleOptions" :key="role.value" :label="role.name" :value="role.name" />
+                </el-select>
             </el-form-item>
         </el-form>
         <template #footer>

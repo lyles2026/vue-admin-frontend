@@ -7,12 +7,22 @@ import DialogBox from '@/components/Common/DialogBox.vue'
 const couponList = ref([])
 const loading = ref(false)
 
+const calculateStatus = (startTime, endTime) => {
+    const now = new Date()
+    const start = new Date(startTime)
+    const end = new Date(endTime)
+    if (now < start) return '未开始'
+    if (now > end) return '已结束'
+    return '进行中'
+}
+
 const fetchCoupons = async () => {
     try {
         const res = await getCoupon()
         couponList.value = res.data.data.map((item, index) => ({
             ...item,
-            id: index + 1
+            id: index + 1,
+            status: calculateStatus(item.startTime, item.endTime)
         }))
     } finally {
         loading.value = false

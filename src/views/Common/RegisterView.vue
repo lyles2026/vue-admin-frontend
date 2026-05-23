@@ -19,20 +19,28 @@ const rules = {
         { min: 6, message: '密码长度至少 6 位', trigger: 'blur' }
     ],
     confirmpassword: [
-        { required: true, message: '请确认密码' },
+        { required: true, message: '请确认密码', trigger: 'blur' },
         {
-            validator: (value) => {
+            validator: (rule, value, callback) => {
                 if (value !== form.password) {
-                    throw new Error('两次密码不一致')
+                    callback(new Error('两次密码不一致'))
+                } else {
+                    callback()
                 }
-            }
+            }, trigger: 'blur'
         }
+    ],
+    phone: [
+        { pattern: /^1\d{10}$/, message: '请输入正确的手机号', trigger: 'blur' }
+    ],
+    email: [
+        { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' }
     ]
 }
 
 
 const handleRegister = async (valid) => {
-    
+
     if (!valid) return
 
     try {
@@ -65,7 +73,8 @@ const handleRegister = async (valid) => {
             <div class="login-form-wrapper">
                 <RegisterPage @submit="handleRegister" :form="form" :rules="rules"
                     @update:username="form.username = $event" @update:password="form.password = $event"
-                    @update:confirmpassword="form.confirmpassword = $event" :showConfirmPassword="true">
+                    @update:confirmpassword="form.confirmpassword = $event" @update:phone="form.phone = $event"
+                    @update:email="form.email = $event" @update:role="form.role = $event" :showConfirmPassword="true">
                     <template #registerButton>
                         <el-button type="info" size="large" @click="handleRegister">注册</el-button>
                     </template>

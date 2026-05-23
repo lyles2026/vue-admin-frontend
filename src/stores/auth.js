@@ -10,7 +10,10 @@ export const useAuthStore = defineStore('auth', () => {
   const form = reactive({
     username: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    phone: '',
+    email: '',
+    role: '普通用户'
   })
 
 
@@ -31,14 +34,14 @@ export const useAuthStore = defineStore('auth', () => {
     form.username = ''
     form.password = ''
     form.confirmPassword = ''
+    form.phone = ''
+    form.email = ''
+    form.role = '普通用户'
     localStorage.removeItem('token')
   }
 
   const register = async (data) => {
-    const result = await registerApi(data)
-    token.value = result.data.data.token
-    userInfo.value = result.data.data
-    localStorage.setItem('token', result.data.data.token)
+    await registerApi(data)
   }
 
   return {
