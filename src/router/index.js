@@ -89,6 +89,24 @@ const router = createRouter({
           component: () => import('@/views/Admin/RoleView.vue'),
           meta: { title: '角色管理' }
         },
+        {
+          path: '/Distribution/permissions',
+          name: 'distribution-permissions',
+          component: () => import('@/views/Distribution/DistributorView.vue'),
+          meta: { title: '分销员管理' }
+        },
+        {
+          path: '/Distribution/list',
+          name: 'distribution-list',
+          component: () => import('@/views/Distribution/DistributionOrderView.vue'),
+          meta: { title: '分销订单' }
+        },
+        {
+          path: '/Distribution/commission',
+          name: 'distribution-commission',
+          component: () => import('@/views/Distribution/CommissionView.vue'),
+          meta: { title: '佣金管理' }
+        },
       ]
     },
     {
