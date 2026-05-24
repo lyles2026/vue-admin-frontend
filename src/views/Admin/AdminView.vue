@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { getAdminList, addAdmin, updateAdmin, deleteAdmin } from '@/api/admin'
 import DialogBox from '@/components/Common/DialogBox.vue'
 import { ElMessage } from 'element-plus'
+import LayoutBox from '@/components/Common/LayoutBox.vue'
 
 const adminList = ref([])
 const loading = ref(false)
@@ -98,6 +99,27 @@ const rules = {
     password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { min: 6, message: '至少6位', trigger: 'blur' }],
     nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
 }
+
+
+const tableColumn = [
+    { prop: 'id', label: 'ID', width: 80 },
+    { prop: 'username', label: '用户名' },
+    { prop: 'nickname', label: '昵称' },
+    { prop: 'phone', label: '手机号' },
+    { prop: 'email', label: '邮箱' },
+    {
+        prop: 'status',
+        label: '状态',
+        width: 100,
+        type: 'status'
+    },
+    { prop: 'createdAt', label: '创建时间' },
+    {
+        type: 'actions',
+        label: '操作',
+        width: 150
+    }
+]
 </script>
 
 
@@ -121,34 +143,18 @@ const rules = {
             </el-form>
         </el-card>
 
-        <el-card shadow="never">
-            <template #header>
-                <div class="card-header">
-                    <span>管理员列表</span>
-                    <el-button type="primary" @click="handleAdd">新增管理员</el-button>
-                </div>
+        <LayoutBox :DataList="adminList" :tableColumn="tableColumn" title="管理员列表" add="新增管理员" :loading="loading"
+            @add="handleAdd" @edit="handleEdit" @delete="handleDelete">
+
+            <template #status="{ row }">
+                <el-tag :type="row.status === '正常' ? 'success' : 'danger'">{{ row.status }}</el-tag>
             </template>
 
-            <el-table :data="adminList" stripe v-loading="loading">
-                <el-table-column prop="id" label="ID" width="80" />
-                <el-table-column prop="username" label="用户名" />
-                <el-table-column prop="nickname" label="昵称" />
-                <el-table-column prop="phone" label="手机号" />
-                <el-table-column prop="email" label="邮箱" />
-                <el-table-column prop="status" label="状态" width="100">
-                    <template #default="{ row }">
-                        <el-tag :type="row.status === '正常' ? 'success' : 'danger'">{{ row.status }}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="createdAt" label="创建时间" />
-                <el-table-column label="操作" width="150">
-                    <template #default="{ row }">
-                        <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-                        <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </el-card>
+            <template #actions="{ row }">
+                <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+                <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            </template>
+        </LayoutBox>
 
         <DialogBox :visible="open" :List="List" :type="dialogType" :formData="currentRow" :rules="rules"
             :shopStatus="[{ name: '正常', value: '正常' }, { name: '禁用', value: '禁用' }]"

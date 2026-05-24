@@ -78,10 +78,7 @@ const copyLink = async (url) => {
 const previewVisible = ref(false)
 const previewUrl = ref('')
 
-const handlePreview = (url) => {
-    previewUrl.value = url
-    previewVisible.value = true
-}
+
 </script>
 
 
