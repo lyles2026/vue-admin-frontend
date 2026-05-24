@@ -2,11 +2,18 @@
 import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getDistOrderList } from '@/api/distOrder'
+import { getPageConfig } from '@/api/pageConfig'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 import SearchCard from '@/components/Common/SearchCard.vue'
 
 const { list: orderList, loading, fetchList } = useList(getDistOrderList)
-onMounted(() => fetchList())
+const DistOrderColumns = ref([])
+
+onMounted(async () => {
+    fetchList()
+    const res = await getPageConfig('distOrder')
+    DistOrderColumns.value = res.data.data.columns
+})
 
 const searchForm = ref({
     orderNo: '',
@@ -34,17 +41,6 @@ const handleReset = () => {
     searchForm.value = { orderNo: '', distributor: '', status: '' }
     fetchList()
 }
-
-const DistOrderColumns = [
-    { prop: 'id', label: 'ID', width: 80 },
-    { prop: 'orderNo', label: '订单号' },
-    { prop: 'buyer', label: '买家' },
-    { prop: 'distributor', label: '分销员' },
-    { prop: 'commission', label: '佣金' },
-    { prop: 'level', label: '分销层级' },
-    { prop: 'status', label: '状态', width: 100 },
-    { prop: 'createTime', label: '创建时间' },
-]
 </script>
 
 

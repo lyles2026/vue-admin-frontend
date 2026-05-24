@@ -3,12 +3,16 @@ import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { addSize, deleteSize, getSize, updateSize } from '@/api/size.js'
 import { getShop } from '@/api/shop'
+import { getPageConfig } from '@/api/pageConfig'
 import DialogBox from '@/components/Common/DialogBox.vue'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 
 
 // 规格列表
 const { list: sizeList, loading } = useList(getSize)
+
+const SizeColumns = ref([])
+const List = ref([])
 
 const open = ref(false)
 
@@ -29,7 +33,12 @@ const fetchSize = async () => {
     }
 }
 
-onMounted(() => fetchSize())
+onMounted(async () => {
+    fetchSize()
+    const res = await getPageConfig('size')
+    SizeColumns.value = res.data.data.columns
+    List.value = res.data.data.formFields
+})
 
 // 对话框
 const dialogTitle = ref('新增规格')
@@ -72,18 +81,6 @@ const handleSubmit = async (form) => {
     fetchSize()
 }
 
-const List = [
-    { name: 'name', label: '规格名称' },
-    { name: 'values', label: '规格值(用逗号分隔)' }
-]
-
-const SizeColumns = [
-    { prop: 'id', label: 'ID', width: 80 },
-    { prop: 'name', label: '规格名称' },
-    { prop: 'values', label: '规格值' },
-    { prop: 'goodsCount', label: '使用商品数', width: 120 },
-    { type: 'actions', label: '操作', width: 150 }
-]
 </script>
 
 

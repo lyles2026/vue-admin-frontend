@@ -2,11 +2,20 @@
 import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getVipList, addVip, updateVip, deleteVip } from '@/api/vip'
+import { getPageConfig } from '@/api/pageConfig'
 import DialogBox from '@/components/Common/DialogBox.vue'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 
 const { list: vipList, loading, fetchList: fetchVip } = useList(getVipList)
-onMounted(() => fetchVip())
+const VipColumns = ref([])
+const List = ref([])
+
+onMounted(async () => {
+    fetchVip()
+    const res = await getPageConfig('vip')
+    VipColumns.value = res.data.data.columns
+    List.value = res.data.data.formFields
+})
 
 const open = ref(false)
 const dialogType = ref('add')
@@ -40,14 +49,6 @@ const handleSubmit = async (form) => {
     fetchVip()
 }
 
-const List = [
-    { name: 'name', label: '等级名称' },
-    { name: 'level', label: '等级' },
-    { name: 'discount', label: '折扣' },
-    { name: 'minAmount', label: '最低消费' },
-    { name: 'maxAmount', label: '最高消费' },
-]
-
 const rules = {
     name: [
         { required: true, message: '请输入等级名称', trigger: 'blur' },
@@ -66,14 +67,6 @@ const rules = {
     ]
 }
 
-const VipColumns = [
-    { prop: 'id', label: 'ID', width: 80 },
-    { prop: 'name', label: '等级名称' },
-    { prop: 'level', label: '等级', width: 80 },
-    { prop: 'discount', label: '折扣', width: 100 },
-    { prop: 'amountRange', label: '消费金额区间' },
-    { type: 'actions', label: '操作', width: 150 }
-]
 </script>
 
 

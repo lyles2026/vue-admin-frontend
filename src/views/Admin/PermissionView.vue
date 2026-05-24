@@ -2,11 +2,18 @@
 import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getPermissionList, addPermission, updatePermission, deletePermission } from '@/api/permission'
+import { getPageConfig } from '@/api/pageConfig'
 import { ElMessage } from 'element-plus'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 
 const { list: permissionList, loading, fetchList } = useList(getPermissionList)
-onMounted(() => fetchList())
+const PermissionColumns = ref([])
+
+onMounted(async () => {
+    fetchList()
+    const res = await getPageConfig('permission')
+    PermissionColumns.value = res.data.data.columns
+})
 
 const dialogVisible = ref(false)
 const dialogType = ref('add')
@@ -46,15 +53,7 @@ const handleSubmit = async () => {
     fetchList()
 }
 
-const PermissionColumns = [
-    { prop: 'name', label: '权限名称' },
-    { prop: 'code', label: '权限标识' },
-    { prop: 'type', label: '类型', width: 100 },
-    { prop: 'path', label: '路径' },
-    { prop: 'parent', label: '父级' },
-    { prop: 'roles', label: '授权角色', width: 180 },
-    { type: 'actions', label: '操作', width: 150 }
-]
+
 </script>
 
 

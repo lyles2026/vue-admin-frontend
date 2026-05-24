@@ -2,11 +2,18 @@
 import { ref, onMounted, computed } from 'vue'
 import { useList } from '@/composables/useList'
 import { getNoticeList, addNotice, updateNotice, deleteNotice } from '@/api/notice'
+import { getPageConfig } from '@/api/pageConfig'
 import { ElMessage } from 'element-plus'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 
 const { list: noticeList, loading, fetchList } = useList(getNoticeList)
-onMounted(() => fetchList())
+const NoticeColumns = ref([])
+
+onMounted(async () => {
+    fetchList()
+    const res = await getPageConfig('notice')
+    NoticeColumns.value = res.data.data.columns
+})
 
 const dialogVisible = ref(false)
 const dialogType = ref('add')
@@ -55,16 +62,6 @@ const handleSubmit = async () => {
     ElMessage({ message: '保存成功', type: 'success', center: true })
     fetchList()
 }
-
-const NoticeColumns = [
-    { prop: 'id', label: 'ID', width: 80 },
-    { prop: 'title', label: '标题' },
-    { prop: 'type', label: '类型', width: 100 },
-    { prop: 'status', label: '状态', width: 100 },
-    { prop: 'sort', label: '排序', width: 80 },
-    { prop: 'createTime', label: '创建时间' },
-    { type: 'actions', label: '操作', width: 150 }
-]
 </script>
 
 

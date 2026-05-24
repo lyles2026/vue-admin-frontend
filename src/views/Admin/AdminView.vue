@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getAdminList, addAdmin, updateAdmin, deleteAdmin } from '@/api/admin'
+import { getPageConfig } from '@/api/pageConfig'
 import DialogBox from '@/components/Common/DialogBox.vue'
 import { ElMessage } from 'element-plus'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
@@ -8,7 +9,15 @@ import SearchCard from '@/components/Common/SearchCard.vue'
 import { useList } from '@/composables/useList'
 
 const { list: adminList, loading, fetchList: fetchAdmins } = useList(getAdminList)
-onMounted(() => fetchAdmins())
+const AdminColumns = ref([])
+const List = ref([])
+
+onMounted(async () => {
+    fetchAdmins()
+    const res = await getPageConfig('admin')
+    AdminColumns.value = res.data.data.columns
+    List.value = res.data.data.formFields
+})
 
 const searchForm = ref({
     keyword: '',
@@ -73,41 +82,11 @@ const handleSubmit = async (form) => {
     fetchAdmins()
 }
 
-const List = [
-    { name: 'username', label: '用户名' },
-    { name: 'password', label: '密码' },
-    { name: 'nickname', label: '昵称' },
-    { name: 'phone', label: '手机号' },
-    { name: 'email', label: '邮箱' },
-    { id: 2, name: 'status', label: '状态' },
-]
-
 const rules = {
     username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
     password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { min: 6, message: '至少6位', trigger: 'blur' }],
     nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
 }
-
-
-const AdminColumns = [
-    { prop: 'id', label: 'ID', width: 80 },
-    { prop: 'username', label: '用户名' },
-    { prop: 'nickname', label: '昵称' },
-    { prop: 'phone', label: '手机号' },
-    { prop: 'email', label: '邮箱' },
-    {
-        prop: 'status',
-        label: '状态',
-        width: 100,
-        type: 'status'
-    },
-    { prop: 'createdAt', label: '创建时间' },
-    {
-        type: 'actions',
-        label: '操作',
-        width: 150
-    }
-]
 </script>
 
 

@@ -5,8 +5,12 @@ import { ref, onMounted } from 'vue';
 import { useList } from '@/composables/useList'
 import { getShop, addShop, deleteShop, updateShop } from '@/api/shop';
 import { getCategory } from '@/api/category';
+import { getPageConfig } from '@/api/pageConfig'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 import SearchCard from '@/components/Common/SearchCard.vue'
+
+
+const ShopColumns = ref([])
 
 
 
@@ -46,7 +50,6 @@ const handleReset = () => {
 }
 
 const { list: goodsList, loading, fetchList: fetchGoods } = useList(getShop)
-onMounted(() => fetchGoods())
 
 const handleConfirm = async (form) => {
     const now = new Date()
@@ -70,6 +73,7 @@ const shopCategory = ref([])
 const shopStatus = ref([])
 
 onMounted(async () => {
+    fetchGoods()
     const [staticRes, catRes] = await Promise.all([getShopList(), getCategory()])
     shopStatus.value = staticRes.data.data.shopStatus
     const categories = catRes.data.data || []
@@ -77,6 +81,8 @@ onMounted(async () => {
         name: item.name,
         value: item._id
     }))
+    const res = await getPageConfig('shop')
+    ShopColumns.value = res.data.data.columns
 })
 
 const rules = {
@@ -122,16 +128,6 @@ const List = [
     { id: 2, name: 'status', label: '状态' },
 ]
 
-const ShopColumns = [
-    { prop: 'id', label: 'ID', width: 80 },
-    { prop: 'name', label: '商品名称', minWidth: 150 },
-    { prop: 'category', label: '分类', width: 120 },
-    { prop: 'price', label: '价格', width: 120 },
-    { prop: 'stock', label: '库存', width: 100 },
-    { prop: 'status', label: '状态', width: 100 },
-    { prop: 'createTime', label: '创建时间', width: 180 },
-    { type: 'actions', label: '操作', width: 150 }
-]
 </script>
 
 <template>

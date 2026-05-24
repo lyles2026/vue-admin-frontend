@@ -2,12 +2,19 @@
 import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getDistributorList, updateDistributor } from '@/api/distributor'
+import { getPageConfig } from '@/api/pageConfig'
 import { ElMessage } from 'element-plus'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 import SearchCard from '@/components/Common/SearchCard.vue'
 
 const { list: distributorList, loading, fetchList } = useList(getDistributorList)
-onMounted(() => fetchList())
+const DistributorColumns = ref([])
+
+onMounted(async () => {
+    fetchList()
+    const res = await getPageConfig('distributor')
+    DistributorColumns.value = res.data.data.columns
+})
 
 const searchForm = ref({
     keyword: '',
@@ -49,20 +56,7 @@ const handleDisable = async (row) => {
     await updateDistributor(row._id, { status: newStatus })
     ElMessage({ message: newStatus === '正常' ? '已启用' : '已禁用', type: 'success', center: true })
     fetchList()
-}
-
-const DistributorColumns = [
-    { prop: 'id', label: 'ID', width: 80 },
-    { prop: 'name', label: '姓名' },
-    { prop: 'phone', label: '手机号' },
-    { prop: 'level', label: '分销等级' },
-    { prop: 'totalCommission', label: '累计佣金' },
-    { prop: 'settledCommission', label: '已结算' },
-    { prop: 'pendingCommission', label: '待结算' },
-    { prop: 'status', label: '状态', width: 100 },
-    { type: 'actions', label: '操作', width: 150 }
-]
-</script>
+}</script>
 
 
 <template>

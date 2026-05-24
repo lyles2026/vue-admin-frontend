@@ -2,13 +2,20 @@
 import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getOrderList, addOrder, updateOrder, deleteOrder } from '@/api/order'
+import { getPageConfig } from '@/api/pageConfig'
 import { ElMessage } from 'element-plus'
 import DialogBox from '@/components/Common/DialogBox.vue'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 import SearchCard from '@/components/Common/SearchCard.vue'
 
 const { list: orderList, loading, fetchList: fetchOrders } = useList(getOrderList)
-onMounted(() => fetchOrders())
+const OrderColumns = ref([])
+
+onMounted(async () => {
+    fetchOrders()
+    const res = await getPageConfig('order')
+    OrderColumns.value = res.data.data.columns
+})
 
 const searchForm = ref({
     orderNo: '',
@@ -110,15 +117,6 @@ const orderRules = {
     amount: [{ required: true, message: '请输入订单金额', trigger: 'blur' }],
 }
 
-const OrderColumns = [
-    { prop: 'orderNo', label: '订单号', width: 180 },
-    { prop: 'user', label: '买家' },
-    { prop: 'phone', label: '手机号' },
-    { prop: 'amount', label: '订单金额' },
-    { prop: 'status', label: '状态', width: 100 },
-    { prop: 'payTime', label: '支付时间' },
-    { type: 'actions', label: '操作', width: 220 }
-]
 </script>
 
 

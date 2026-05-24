@@ -3,12 +3,21 @@ import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getRoleList, addRole, updateRole, deleteRole } from '@/api/role'
 import { getPermissionList } from '@/api/permission'
+import { getPageConfig } from '@/api/pageConfig'
 import { ElMessage } from 'element-plus'
 import DialogBox from '@/components/Common/DialogBox.vue'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 
 const { list: roleList, loading, fetchList: fetchRoles } = useList(getRoleList)
-onMounted(() => fetchRoles())
+const RoleColumns = ref([])
+const roleFormList = ref([])
+
+onMounted(async () => {
+    fetchRoles()
+    const res = await getPageConfig('role')
+    RoleColumns.value = res.data.data.columns
+    roleFormList.value = res.data.data.formFields
+})
 
 // 角色编辑对话框
 const open = ref(false)
@@ -44,12 +53,6 @@ const handleSubmit = async (form) => {
     ElMessage({ message: '保存成功', type: 'success', center: true })
     fetchRoles()
 }
-
-const roleFormList = [
-    { name: 'name', label: '角色名称' },
-    { name: 'code', label: '角色标识' },
-    { name: 'description', label: '描述' },
-]
 
 const roleRules = {
     name: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
@@ -98,14 +101,6 @@ const savePermissions = async () => {
     fetchRoles()
 }
 
-const RoleColumns = [
-    { prop: 'id', label: 'ID', width: 80 },
-    { prop: 'name', label: '角色名称' },
-    { prop: 'code', label: '角色标识' },
-    { prop: 'description', label: '描述' },
-    { prop: 'permissions', label: '权限数', width: 100 },
-    { type: 'actions', label: '操作', width: 200 }
-]
 </script>
 
 

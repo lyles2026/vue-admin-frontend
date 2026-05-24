@@ -2,21 +2,21 @@
 import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getCoupon, addCoupon, updateCoupon, deleteCoupon } from '@/api/coupon'
+import { getPageConfig } from '@/api/pageConfig'
 import DialogBox from '@/components/Common/DialogBox.vue'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 
 // 优惠券列表
-const calculateStatus = (startTime, endTime) => {
-    const now = new Date()
-    const start = new Date(startTime)
-    const end = new Date(endTime)
-    if (now < start) return '未开始'
-    if (now > end) return '已结束'
-    return '进行中'
-}
-
 const { list: couponList, loading, fetchList: fetchCoupons } = useList(getCoupon)
-onMounted(() => fetchCoupons())
+const CouponColumns = ref([])
+const List = ref([])
+
+onMounted(async () => {
+    fetchCoupons()
+    const res = await getPageConfig('coupon')
+    CouponColumns.value = res.data.data.columns
+    List.value = res.data.data.formFields
+})
 
 const open = ref(false)
 const dialogTitle = ref('新增优惠券')
@@ -63,24 +63,6 @@ const handleSubmit = async (form) => {
     fetchCoupons()
 }
 
-const List = [
-    { name: 'name', label: '优惠券名称' },
-    { name: 'type', label: '类型' },
-    { name: 'value', label: '优惠内容' },
-    { id: 4, name: 'validity', label: '有效期' },
-]
-
-const CouponColumns = [
-    { prop: 'id', label: 'ID', width: 80 },
-    { prop: 'name', label: '优惠券名称' },
-    { prop: 'type', label: '类型', width: 100 },
-    { prop: 'value', label: '优惠内容', width: 120 },
-    { prop: 'startTime', label: '开始时间', width: 120 },
-    { prop: 'endTime', label: '结束时间', width: 120 },
-    { prop: 'status', label: '状态', width: 100 },
-    { prop: 'receiveCount', label: '领取人数', width: 100 },
-    { type: 'actions', label: '操作', width: 150 }
-]
 </script>
 
 

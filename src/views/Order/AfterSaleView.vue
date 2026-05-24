@@ -2,13 +2,20 @@
 import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getAfterSaleList, updateAfterSale, deleteAfterSale } from '@/api/afterSale'
+import { getPageConfig } from '@/api/pageConfig'
 import { ElMessage } from 'element-plus'
 import DialogBox from '@/components/Common/DialogBox.vue'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 import SearchCard from '@/components/Common/SearchCard.vue'
 
 const { list: afterSaleList, loading, fetchList } = useList(getAfterSaleList)
-onMounted(() => fetchList())
+const AfterSaleColumns = ref([])
+
+onMounted(async () => {
+    fetchList()
+    const res = await getPageConfig('afterSale')
+    AfterSaleColumns.value = res.data.data.columns
+})
 
 const searchForm = ref({
     orderNo: '',
@@ -83,17 +90,6 @@ const handleDelete = async (row) => {
     fetchList()
 }
 
-const AfterSaleColumns = [
-    { prop: 'id', label: '售后单号', width: 100 },
-    { prop: 'orderNo', label: '订单号' },
-    { prop: 'user', label: '买家' },
-    { prop: 'type', label: '售后类型', width: 100 },
-    { prop: 'reason', label: '售后原因' },
-    { prop: 'amount', label: '金额' },
-    { prop: 'status', label: '状态', width: 100 },
-    { prop: 'createTime', label: '申请时间' },
-    { type: 'actions', label: '操作', width: 180 }
-]
 </script>
 
 

@@ -1,14 +1,18 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getUserList, updateUser, deleteUser } from '@/api/user'
 import { getVipList } from '@/api/vip'
+import { getPageConfig } from '@/api/pageConfig'
 import DialogBox from '@/components/Common/DialogBox.vue'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 import SearchCard from '@/components/Common/SearchCard.vue'
 
 // 用户列表
 const { list: userList, loading } = useList(getUserList)
+
+const UserColumns = ref([])
+const List = ref([])
 
 const fetchUsers = async () => {
     loading.value = true
@@ -81,17 +85,6 @@ const handleDelete = async (row) => {
     fetchUsers()
 }
 
-const List = computed(() => {
-    const items = [
-        { name: 'nickname', label: '昵称' },
-        { name: 'phone', label: '手机号' },
-        { name: 'email', label: '邮箱' },
-        { id: 1, name: 'level', label: '会员等级' },
-        { id: 2, name: 'status', label: '状态' },
-    ]
-    return items
-})
-
 const levelOptions = ref([])
 
 const statusOptions = [
@@ -112,9 +105,12 @@ const fetchLevelOptions = async () => {
     }
 }
 
-onMounted(() => {
+onMounted(async () => {
     fetchUsers()
     fetchLevelOptions()
+    const res = await getPageConfig('user')
+    UserColumns.value = res.data.data.columns
+    List.value = res.data.data.formFields
 })
 
 const rules = {
@@ -136,17 +132,6 @@ const rules = {
     ]
 }
 
-const UserColumns = [
-    { prop: 'id', label: 'ID', width: 80 },
-    { prop: 'username', label: '用户名' },
-    { prop: 'nickname', label: '昵称' },
-    { prop: 'phone', label: '手机号' },
-    { prop: 'email', label: '邮箱' },
-    { prop: 'level', label: '会员等级' },
-    { prop: 'status', label: '状态', width: 100 },
-    { prop: 'createTime', label: '注册时间' },
-    { type: 'actions', label: '操作', width: 220 }
-]
 </script>
 
 
@@ -193,7 +178,7 @@ const UserColumns = [
             <template #actions="{ row }">
                 <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
                 <el-button link type="danger" @click="handleDisable(row)">{{ row.status === '正常' ? '禁用' : '启用'
-                    }}</el-button>
+                }}</el-button>
                 <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
             </template>
         </LayoutBox>
