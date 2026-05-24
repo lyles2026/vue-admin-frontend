@@ -4,6 +4,7 @@ import { getAdminList, addAdmin, updateAdmin, deleteAdmin } from '@/api/admin'
 import DialogBox from '@/components/Common/DialogBox.vue'
 import { ElMessage } from 'element-plus'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
+import SearchCard from '@/components/Common/SearchCard.vue'
 
 const adminList = ref([])
 const loading = ref(false)
@@ -125,23 +126,18 @@ const tableColumn = [
 
 <template>
     <div class="page-container">
-        <el-card class="search-card" shadow="never">
-            <el-form :model="searchForm" inline>
-                <el-form-item label="关键词">
+
+        <SearchCard :searchForm="searchForm" @search="handleSearch" @reset="handleReset">
+            <el-form-item label="关键词">
                     <el-input v-model="searchForm.keyword" placeholder="用户名/昵称" clearable />
                 </el-form-item>
-                <el-form-item label="状态">
-                    <el-select v-model="searchForm.status" placeholder="请选择" clearable>
-                        <el-option label="正常" value="正常" />
-                        <el-option label="禁用" value="禁用" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="handleSearch">搜索</el-button>
-                    <el-button @click="handleReset">重置</el-button>
-                </el-form-item>
-            </el-form>
-        </el-card>
+            <el-form-item label="状态">
+                <el-select v-model="searchForm.status" placeholder="请选择" clearable>
+                    <el-option label="正常" value="正常" />
+                    <el-option label="禁用" value="禁用" />
+                </el-select>
+            </el-form-item>
+        </SearchCard>
 
         <LayoutBox :DataList="adminList" :tableColumn="tableColumn" title="管理员列表" add="新增管理员" :loading="loading"
             @add="handleAdd" @edit="handleEdit" @delete="handleDelete">
@@ -167,13 +163,5 @@ const tableColumn = [
     padding: 20px;
 }
 
-.search-card {
-    margin-bottom: 20px;
-}
 
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
 </style>
