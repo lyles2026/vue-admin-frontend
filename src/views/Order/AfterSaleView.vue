@@ -1,24 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useList } from '@/composables/useList'
 import { getAfterSaleList, updateAfterSale, deleteAfterSale } from '@/api/afterSale'
 import { ElMessage } from 'element-plus'
 import DialogBox from '@/components/Common/DialogBox.vue'
 
-const afterSaleList = ref([])
-const loading = ref(false)
-
-const fetchList = async () => {
-    loading.value = true
-    try {
-        const res = await getAfterSaleList()
-        afterSaleList.value = res.data.data.map((item, index) => ({
-            ...item,
-            id: index + 1
-        }))
-    } finally {
-        loading.value = false
-    }
-}
+const { list: afterSaleList, loading, fetchList } = useList(getAfterSaleList)
 onMounted(() => fetchList())
 
 const searchForm = ref({

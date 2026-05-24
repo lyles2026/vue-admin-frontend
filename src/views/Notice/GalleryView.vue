@@ -1,28 +1,16 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useList } from '@/composables/useList'
 import { getGalleryList, deleteGallery, batchDeleteGallery, uploadFile, addGallery } from '@/api/gallery'
 import { ElMessage } from 'element-plus'
 
-const imageList = ref([])
-const loading = ref(false)
+const { list: imageList, loading, fetchList } = useList(getGalleryList)
 const selectedImages = ref([])
 const uploadRef = ref(null)
 const pendingFile = ref(null)
 const fileName = ref('')
 const renameVisible = ref(false)
 
-const fetchList = async () => {
-    loading.value = true
-    try {
-        const res = await getGalleryList()
-        imageList.value = res.data.data.map((item, index) => ({
-            ...item,
-            id: index + 1
-        }))
-    } finally {
-        loading.value = false
-    }
-}
 onMounted(() => fetchList())
 
 const handleUpload = async (file) => {
@@ -127,7 +115,7 @@ const previewUrl = ref('')
                 <el-form-item label="文件名">
                     <el-input v-model="fileName" placeholder="请输入文件名" />
                     <span style="color:#909399;font-size:12px;margin-left:5px">.{{ pendingFile?.name?.split('.').pop()
-                    }}</span>
+                        }}</span>
                 </el-form-item>
             </el-form>
             <template #footer>

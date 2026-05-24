@@ -2,6 +2,7 @@
 import { getShopList } from '@/api/static.js';
 import DialogBox from '@/components/Common/DialogBox.vue'
 import { ref, onMounted } from 'vue';
+import { useList } from '@/composables/useList'
 import { getShop, addShop, deleteShop, updateShop } from '@/api/shop';
 import { getCategory } from '@/api/category';
 import ShopList from '@/components/Common/ShopList.vue';
@@ -43,24 +44,7 @@ const handleReset = () => {
     handleSearch()
 }
 
-const goodsList = ref([])
-const loading = ref(false)
-
-// 调用接口
-const fetchGoods = async () => {
-    loading.value = true
-    try {
-        const res = await getShop()
-        goodsList.value = res.data.data.map((item, index) => ({
-            ...item,
-            id: index + 1
-        }))
-
-    } finally {
-        loading.value = false
-    }
-}
-
+const { list: goodsList, loading, fetchList: fetchGoods } = useList(getShop)
 onMounted(() => fetchGoods())
 
 

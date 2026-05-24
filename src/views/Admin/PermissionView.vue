@@ -1,23 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useList } from '@/composables/useList'
 import { getPermissionList, addPermission, updatePermission, deletePermission } from '@/api/permission'
 import { ElMessage } from 'element-plus'
 
-const permissionList = ref([])
-const loading = ref(false)
-
-const fetchList = async () => {
-    loading.value = true
-    try {
-        const res = await getPermissionList()
-        permissionList.value = res.data.data.map((item, index) => ({
-            ...item,
-            id: index + 1
-        }))
-    } finally {
-        loading.value = false
-    }
-}
+const { list: permissionList, loading, fetchList } = useList(getPermissionList)
 onMounted(() => fetchList())
 
 const dialogVisible = ref(false)

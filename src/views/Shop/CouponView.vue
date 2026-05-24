@@ -1,12 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useList } from '@/composables/useList'
 import { getCoupon, addCoupon, updateCoupon, deleteCoupon } from '@/api/coupon'
 import DialogBox from '@/components/Common/DialogBox.vue'
 
 // 优惠券列表
-const couponList = ref([])
-const loading = ref(false)
-
 const calculateStatus = (startTime, endTime) => {
     const now = new Date()
     const start = new Date(startTime)
@@ -16,18 +14,7 @@ const calculateStatus = (startTime, endTime) => {
     return '进行中'
 }
 
-const fetchCoupons = async () => {
-    try {
-        const res = await getCoupon()
-        couponList.value = res.data.data.map((item, index) => ({
-            ...item,
-            id: index + 1,
-            status: calculateStatus(item.startTime, item.endTime)
-        }))
-    } finally {
-        loading.value = false
-    }
-}
+const { list: couponList, loading, fetchList: fetchCoupons } = useList(getCoupon)
 onMounted(() => fetchCoupons())
 
 const open = ref(false)

@@ -1,25 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useList } from '@/composables/useList'
 import { getRoleList, addRole, updateRole, deleteRole } from '@/api/role'
 import { getPermissionList } from '@/api/permission'
 import { ElMessage } from 'element-plus'
 import DialogBox from '@/components/Common/DialogBox.vue'
 
-const roleList = ref([])
-const loading = ref(false)
-
-const fetchRoles = async () => {
-    loading.value = true
-    try {
-        const res = await getRoleList()
-        roleList.value = res.data.data.map((item, index) => ({
-            ...item,
-            id: index + 1
-        }))
-    } finally {
-        loading.value = false
-    }
-}
+const { list: roleList, loading, fetchList: fetchRoles } = useList(getRoleList)
 onMounted(() => fetchRoles())
 
 // 角色编辑对话框

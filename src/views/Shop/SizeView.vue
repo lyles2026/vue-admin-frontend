@@ -1,14 +1,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useList } from '@/composables/useList'
 import { addSize, deleteSize, getSize, updateSize } from '@/api/size.js'
 import { getShop } from '@/api/shop'
 import DialogBox from '@/components/Common/DialogBox.vue'
 
 
 // 规格列表
-const sizeList = ref([])
-
-const loading = ref(false)
+const { list: sizeList, loading } = useList(getSize)
 
 const open = ref(false)
 

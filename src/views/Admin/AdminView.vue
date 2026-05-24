@@ -5,22 +5,9 @@ import DialogBox from '@/components/Common/DialogBox.vue'
 import { ElMessage } from 'element-plus'
 import LayoutBox from '@/components/Common/LayoutBox.vue'
 import SearchCard from '@/components/Common/SearchCard.vue'
+import { useList } from '@/composables/useList'
 
-const adminList = ref([])
-const loading = ref(false)
-
-const fetchAdmins = async () => {
-    loading.value = true
-    try {
-        const res = await getAdminList()
-        adminList.value = res.data.data.map((item, index) => ({
-            ...item,
-            id: index + 1
-        }))
-    } finally {
-        loading.value = false
-    }
-}
+const { list: adminList, loading, fetchList: fetchAdmins } = useList(getAdminList)
 onMounted(() => fetchAdmins())
 
 const searchForm = ref({
@@ -102,7 +89,7 @@ const rules = {
 }
 
 
-const tableColumn = [
+const AdminColumns = [
     { prop: 'id', label: 'ID', width: 80 },
     { prop: 'username', label: '用户名' },
     { prop: 'nickname', label: '昵称' },
@@ -129,8 +116,8 @@ const tableColumn = [
 
         <SearchCard :searchForm="searchForm" @search="handleSearch" @reset="handleReset">
             <el-form-item label="关键词">
-                    <el-input v-model="searchForm.keyword" placeholder="用户名/昵称" clearable />
-                </el-form-item>
+                <el-input v-model="searchForm.keyword" placeholder="用户名/昵称" clearable />
+            </el-form-item>
             <el-form-item label="状态">
                 <el-select v-model="searchForm.status" placeholder="请选择" clearable>
                     <el-option label="正常" value="正常" />
@@ -139,7 +126,7 @@ const tableColumn = [
             </el-form-item>
         </SearchCard>
 
-        <LayoutBox :DataList="adminList" :tableColumn="tableColumn" title="管理员列表" add="新增管理员" :loading="loading"
+        <LayoutBox :DataList="adminList" :tableColumn="AdminColumns" title="管理员列表" add="新增管理员" :loading="loading"
             @add="handleAdd" @edit="handleEdit" @delete="handleDelete">
 
             <template #status="{ row }">
@@ -162,6 +149,4 @@ const tableColumn = [
 .page-container {
     padding: 20px;
 }
-
-
 </style>

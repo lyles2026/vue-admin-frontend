@@ -1,22 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useList } from '@/composables/useList'
 import { getDistOrderList } from '@/api/distOrder'
 
-const orderList = ref([])
-const loading = ref(false)
-
-const fetchList = async () => {
-    loading.value = true
-    try {
-        const res = await getDistOrderList()
-        orderList.value = res.data.data.map((item, index) => ({
-            ...item,
-            id: index + 1
-        }))
-    } finally {
-        loading.value = false
-    }
-}
+const { list: orderList, loading, fetchList } = useList(getDistOrderList)
 onMounted(() => fetchList())
 
 const searchForm = ref({

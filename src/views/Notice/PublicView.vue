@@ -1,23 +1,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useList } from '@/composables/useList'
 import { getNoticeList, addNotice, updateNotice, deleteNotice } from '@/api/notice'
 import { ElMessage } from 'element-plus'
 
-const noticeList = ref([])
-const loading = ref(false)
-
-const fetchList = async () => {
-    loading.value = true
-    try {
-        const res = await getNoticeList()
-        noticeList.value = res.data.data.map((item, index) => ({
-            ...item,
-            id: index + 1
-        }))
-    } finally {
-        loading.value = false
-    }
-}
+const { list: noticeList, loading, fetchList } = useList(getNoticeList)
 onMounted(() => fetchList())
 
 const dialogVisible = ref(false)

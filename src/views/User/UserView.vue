@@ -1,12 +1,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useList } from '@/composables/useList'
 import { getUserList, updateUser, deleteUser } from '@/api/user'
 import { getVipList } from '@/api/vip'
 import DialogBox from '@/components/Common/DialogBox.vue'
 
 // 用户列表
-const userList = ref([])
-const loading = ref(false)
+const { list: userList, loading } = useList(getUserList)
 
 const fetchUsers = async () => {
     loading.value = true
@@ -199,7 +199,7 @@ const rules = {
                     <template #default="{ row }">
                         <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
                         <el-button link type="danger" @click="handleDisable(row)">{{ row.status === '正常' ? '禁用' : '启用'
-                            }}</el-button>
+                        }}</el-button>
                         <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
                     </template>
                 </el-table-column>

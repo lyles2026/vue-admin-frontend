@@ -1,23 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useList } from '@/composables/useList'
 import { getDistributorList, updateDistributor } from '@/api/distributor'
 import { ElMessage } from 'element-plus'
 
-const distributorList = ref([])
-const loading = ref(false)
-
-const fetchList = async () => {
-    loading.value = true
-    try {
-        const res = await getDistributorList()
-        distributorList.value = res.data.data.map((item, index) => ({
-            ...item,
-            id: index + 1
-        }))
-    } finally {
-        loading.value = false
-    }
-}
+const { list: distributorList, loading, fetchList } = useList(getDistributorList)
 onMounted(() => fetchList())
 
 const searchForm = ref({
@@ -120,7 +107,7 @@ const handleDisable = async (row) => {
                     <template #default="{ row }">
                         <el-button link type="primary" @click="handleDetail(row)">详情</el-button>
                         <el-button link type="danger" @click="handleDisable(row)">{{ row.status === '正常' ? '禁用' : '启用'
-                            }}</el-button>
+                        }}</el-button>
                     </template>
                 </el-table-column>
             </el-table>

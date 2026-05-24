@@ -1,23 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useList } from '@/composables/useList'
 import { getVipList, addVip, updateVip, deleteVip } from '@/api/vip'
 import DialogBox from '@/components/Common/DialogBox.vue'
 
-const vipList = ref([])
-const loading = ref(false)
-
-const fetchVip = async () => {
-    loading.value = true
-    try {
-        const res = await getVipList()
-        vipList.value = res.data.data.map((item, index) => ({
-            ...item,
-            id: index + 1
-        }))
-    } finally {
-        loading.value = false
-    }
-}
+const { list: vipList, loading, fetchList: fetchVip } = useList(getVipList)
 onMounted(() => fetchVip())
 
 const open = ref(false)
