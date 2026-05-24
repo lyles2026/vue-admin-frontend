@@ -5,6 +5,7 @@ import { getRoleList, addRole, updateRole, deleteRole } from '@/api/role'
 import { getPermissionList } from '@/api/permission'
 import { ElMessage } from 'element-plus'
 import DialogBox from '@/components/Common/DialogBox.vue'
+import LayoutBox from '@/components/Common/LayoutBox.vue'
 
 const { list: roleList, loading, fetchList: fetchRoles } = useList(getRoleList)
 onMounted(() => fetchRoles())
@@ -96,38 +97,34 @@ const savePermissions = async () => {
     ElMessage({ message: '权限分配成功', type: 'success', center: true })
     fetchRoles()
 }
+
+const RoleColumns = [
+    { prop: 'id', label: 'ID', width: 80 },
+    { prop: 'name', label: '角色名称' },
+    { prop: 'code', label: '角色标识' },
+    { prop: 'description', label: '描述' },
+    { prop: 'permissions', label: '权限数', width: 100 },
+    { type: 'actions', label: '操作', width: 200 }
+]
 </script>
 
 
 <template>
     <div class="page-container">
-        <el-card shadow="never">
-            <template #header>
-                <div class="card-header">
-                    <span>角色管理</span>
-                    <el-button type="primary" @click="handleAdd">新增角色</el-button>
-                </div>
+
+        <LayoutBox :DataList="roleList" :tableColumn="RoleColumns" title="角色管理" add="新增角色" :loading="loading"
+            @add="handleAdd" @edit="handleEdit" @delete="handleDelete">
+
+            <template #permissions="{ row }">
+                {{ (row.permissions || []).length }}
             </template>
 
-            <el-table :data="roleList" stripe v-loading="loading">
-                <el-table-column prop="id" label="ID" width="80" />
-                <el-table-column prop="name" label="角色名称" />
-                <el-table-column prop="code" label="角色标识" />
-                <el-table-column prop="description" label="描述" />
-                <el-table-column prop="permissions" label="权限数" width="100">
-                    <template #default="{ row }">
-                        {{ (row.permissions || []).length }}
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作" width="200">
-                    <template #default="{ row }">
-                        <el-button link type="primary" @click="handlePermission(row)">权限</el-button>
-                        <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-                        <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </el-card>
+            <template #actions="{ row }">
+                <el-button link type="primary" @click="handlePermission(row)">权限</el-button>
+                <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+                <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            </template>
+        </LayoutBox>
 
         <!-- 角色编辑 -->
         <DialogBox :visible="open" :List="roleFormList" :rules="roleRules" :formData="currentRow" :type="dialogType"

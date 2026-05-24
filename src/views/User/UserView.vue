@@ -4,6 +4,8 @@ import { useList } from '@/composables/useList'
 import { getUserList, updateUser, deleteUser } from '@/api/user'
 import { getVipList } from '@/api/vip'
 import DialogBox from '@/components/Common/DialogBox.vue'
+import LayoutBox from '@/components/Common/LayoutBox.vue'
+import SearchCard from '@/components/Common/SearchCard.vue'
 
 // 用户列表
 const { list: userList, loading } = useList(getUserList)
@@ -133,78 +135,68 @@ const rules = {
         { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' }
     ]
 }
+
+const UserColumns = [
+    { prop: 'id', label: 'ID', width: 80 },
+    { prop: 'username', label: '用户名' },
+    { prop: 'nickname', label: '昵称' },
+    { prop: 'phone', label: '手机号' },
+    { prop: 'email', label: '邮箱' },
+    { prop: 'level', label: '会员等级' },
+    { prop: 'status', label: '状态', width: 100 },
+    { prop: 'createTime', label: '注册时间' },
+    { type: 'actions', label: '操作', width: 220 }
+]
 </script>
 
 
 <template>
     <div class="page-container">
-        <el-card class="search-card" shadow="never">
-            <el-form :model="searchForm" inline>
-                <el-form-item label="关键词">
-                    <el-input v-model="searchForm.keyword" placeholder="用户名/昵称/手机号" clearable />
-                </el-form-item>
-                <el-form-item label="会员等级">
-                    <el-select v-model="searchForm.level" placeholder="请选择" clearable>
-                        <el-option v-for="item in levelOptions" :key="item.value" :label="item.name"
-                            :value="item.name" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="状态">
-                    <el-select v-model="searchForm.status" placeholder="请选择" clearable>
-                        <el-option label="正常" value="正常" />
-                        <el-option label="禁用" value="禁用" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="handleSearch">搜索</el-button>
-                    <el-button @click="handleReset">重置</el-button>
-                </el-form-item>
-            </el-form>
-        </el-card>
 
-        <el-card shadow="never">
-            <template #header>
-                <div class="card-header">
-                    <span>用户管理</span>
-                </div>
+        <SearchCard :searchForm="searchForm" @search="handleSearch" @reset="handleReset">
+            <el-form-item label="关键词">
+                <el-input v-model="searchForm.keyword" placeholder="用户名/昵称/手机号" clearable />
+            </el-form-item>
+            <el-form-item label="会员等级">
+                <el-select v-model="searchForm.level" placeholder="请选择" clearable>
+                    <el-option v-for="item in levelOptions" :key="item.value" :label="item.name" :value="item.name" />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="状态">
+                <el-select v-model="searchForm.status" placeholder="请选择" clearable>
+                    <el-option label="正常" value="正常" />
+                    <el-option label="禁用" value="禁用" />
+                </el-select>
+            </el-form-item>
+        </SearchCard>
+
+        <LayoutBox :DataList="userList" :tableColumn="UserColumns" title="用户管理" :loading="loading">
+
+            <template #phone="{ row }">
+                {{ row.phone || '暂无' }}
             </template>
-            <el-table :data="userList" stripe>
-                <el-table-column prop="id" label="ID" width="80" />
-                <el-table-column prop="username" label="用户名" />
-                <el-table-column prop="nickname" label="昵称" />
-                <el-table-column prop="phone" label="手机号">
-                    <template #default="{ row }">
-                        {{ row.phone || '暂无' }}
-                    </template>
-                </el-table-column>
-                <el-table-column prop="email" label="邮箱">
-                    <template #default="{ row }">
-                        {{ row.email || '暂无' }}
-                    </template>
-                </el-table-column>
-                <el-table-column prop="level" label="会员等级">
-                    <template #default="{ row }">
-                        <el-tag :type="row.level === 'SVIP会员' ? 'danger' : row.level === 'VIP会员' ? 'warning' : ''">
-                            {{ row.level }}
-                        </el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="status" label="状态" width="100">
-                    <template #default="{ row }">
-                        <el-tag :type="row.status === '正常' ? 'success' : 'danger'">{{ row.status }}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="createTime" label="注册时间" />
-                <el-table-column label="操作" width="220">
-                    <template #default="{ row }">
-                        <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-                        <el-button link type="danger" @click="handleDisable(row)">{{ row.status === '正常' ? '禁用' : '启用'
-                        }}</el-button>
-                        <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </el-card>
+
+            <template #email="{ row }">
+                {{ row.email || '暂无' }}
+            </template>
+
+            <template #level="{ row }">
+                <el-tag :type="row.level === 'SVIP会员' ? 'danger' : row.level === 'VIP会员' ? 'warning' : ''">
+                    {{ row.level }}
+                </el-tag>
+            </template>
+
+            <template #status="{ row }">
+                <el-tag :type="row.status === '正常' ? 'success' : 'danger'">{{ row.status }}</el-tag>
+            </template>
+
+            <template #actions="{ row }">
+                <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+                <el-button link type="danger" @click="handleDisable(row)">{{ row.status === '正常' ? '禁用' : '启用'
+                    }}</el-button>
+                <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            </template>
+        </LayoutBox>
 
         <DialogBox :visible="open" :List="List" :formData="currentRow" :shopCategory="levelOptions"
             :shopStatus="statusOptions" :rules="rules" title="编辑用户" @confirm="handleSubmit"

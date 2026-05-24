@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getDistOrderList } from '@/api/distOrder'
+import LayoutBox from '@/components/Common/LayoutBox.vue'
+import SearchCard from '@/components/Common/SearchCard.vue'
 
 const { list: orderList, loading, fetchList } = useList(getDistOrderList)
 onMounted(() => fetchList())
@@ -32,52 +34,48 @@ const handleReset = () => {
     searchForm.value = { orderNo: '', distributor: '', status: '' }
     fetchList()
 }
+
+const DistOrderColumns = [
+    { prop: 'id', label: 'ID', width: 80 },
+    { prop: 'orderNo', label: '订单号' },
+    { prop: 'buyer', label: '买家' },
+    { prop: 'distributor', label: '分销员' },
+    { prop: 'commission', label: '佣金' },
+    { prop: 'level', label: '分销层级' },
+    { prop: 'status', label: '状态', width: 100 },
+    { prop: 'createTime', label: '创建时间' },
+]
 </script>
 
 
 <template>
     <div class="page-container">
-        <el-card class="search-card" shadow="never">
-            <el-form :model="searchForm" inline>
-                <el-form-item label="订单号">
-                    <el-input v-model="searchForm.orderNo" placeholder="请输入订单号" clearable />
-                </el-form-item>
-                <el-form-item label="分销员">
-                    <el-input v-model="searchForm.distributor" placeholder="请输入分销员姓名" clearable />
-                </el-form-item>
-                <el-form-item label="结算状态">
-                    <el-select v-model="searchForm.status" placeholder="请选择" clearable>
-                        <el-option label="待结算" value="待结算" />
-                        <el-option label="已结算" value="已结算" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="handleSearch">搜索</el-button>
-                    <el-button @click="handleReset">重置</el-button>
-                </el-form-item>
-            </el-form>
-        </el-card>
 
-        <el-card shadow="never">
-            <el-table :data="orderList" stripe v-loading="loading">
-                <el-table-column prop="id" label="ID" width="80" />
-                <el-table-column prop="orderNo" label="订单号" />
-                <el-table-column prop="buyer" label="买家" />
-                <el-table-column prop="distributor" label="分销员" />
-                <el-table-column prop="commission" label="佣金">
-                    <template #default="{ row }">
-                        <span style="color: #f56c6c;">¥{{ row.commission }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="level" label="分销层级" />
-                <el-table-column prop="status" label="状态" width="100">
-                    <template #default="{ row }">
-                        <el-tag :type="row.status === '已结算' ? 'success' : 'warning'">{{ row.status }}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="createTime" label="创建时间" />
-            </el-table>
-        </el-card>
+        <SearchCard :searchForm="searchForm" @search="handleSearch" @reset="handleReset">
+            <el-form-item label="订单号">
+                <el-input v-model="searchForm.orderNo" placeholder="请输入订单号" clearable />
+            </el-form-item>
+            <el-form-item label="分销员">
+                <el-input v-model="searchForm.distributor" placeholder="请输入分销员姓名" clearable />
+            </el-form-item>
+            <el-form-item label="结算状态">
+                <el-select v-model="searchForm.status" placeholder="请选择" clearable>
+                    <el-option label="待结算" value="待结算" />
+                    <el-option label="已结算" value="已结算" />
+                </el-select>
+            </el-form-item>
+        </SearchCard>
+
+        <LayoutBox :DataList="orderList" :tableColumn="DistOrderColumns" title="分销订单" :loading="loading">
+
+            <template #commission="{ row }">
+                <span style="color: #f56c6c;">¥{{ row.commission }}</span>
+            </template>
+
+            <template #status="{ row }">
+                <el-tag :type="row.status === '已结算' ? 'success' : 'warning'">{{ row.status }}</el-tag>
+            </template>
+        </LayoutBox>
     </div>
 </template>
 

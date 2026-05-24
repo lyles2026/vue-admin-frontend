@@ -4,6 +4,8 @@ import { useList } from '@/composables/useList'
 import { getOrderList, addOrder, updateOrder, deleteOrder } from '@/api/order'
 import { ElMessage } from 'element-plus'
 import DialogBox from '@/components/Common/DialogBox.vue'
+import LayoutBox from '@/components/Common/LayoutBox.vue'
+import SearchCard from '@/components/Common/SearchCard.vue'
 
 const { list: orderList, loading, fetchList: fetchOrders } = useList(getOrderList)
 onMounted(() => fetchOrders())
@@ -107,67 +109,57 @@ const orderRules = {
     phone: [{ pattern: /^1\d{10}$/, message: '请输入正确的手机号', trigger: 'blur' }],
     amount: [{ required: true, message: '请输入订单金额', trigger: 'blur' }],
 }
+
+const OrderColumns = [
+    { prop: 'orderNo', label: '订单号', width: 180 },
+    { prop: 'user', label: '买家' },
+    { prop: 'phone', label: '手机号' },
+    { prop: 'amount', label: '订单金额' },
+    { prop: 'status', label: '状态', width: 100 },
+    { prop: 'payTime', label: '支付时间' },
+    { type: 'actions', label: '操作', width: 220 }
+]
 </script>
 
 
 <template>
     <div class="page-container">
-        <el-card class="search-card" shadow="never">
-            <el-form :model="searchForm" inline>
-                <el-form-item label="订单号">
-                    <el-input v-model="searchForm.orderNo" placeholder="请输入订单号" clearable />
-                </el-form-item>
-                <el-form-item label="订单状态">
-                    <el-select v-model="searchForm.status" placeholder="请选择" clearable>
-                        <el-option label="待付款" value="待付款" />
-                        <el-option label="待发货" value="待发货" />
-                        <el-option label="已发货" value="已发货" />
-                        <el-option label="已完成" value="已完成" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="下单时间">
-                    <el-date-picker v-model="searchForm.dateRange" type="daterange" range-separator="至"
-                        start-placeholder="开始日期" end-placeholder="结束日期" value-format="YYYY-MM-DD" />
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="handleSearch">搜索</el-button>
-                    <el-button @click="handleReset">重置</el-button>
-                </el-form-item>
-            </el-form>
-        </el-card>
 
-        <el-card shadow="never">
-            <template #header>
-                <div class="card-header">
-                    <span>订单列表</span>
-                    <el-button type="primary" @click="handleAddOrder">新增订单</el-button>
-                </div>
+        <SearchCard :searchForm="searchForm" @search="handleSearch" @reset="handleReset">
+            <el-form-item label="订单号">
+                <el-input v-model="searchForm.orderNo" placeholder="请输入订单号" clearable />
+            </el-form-item>
+            <el-form-item label="订单状态">
+                <el-select v-model="searchForm.status" placeholder="请选择" clearable>
+                    <el-option label="待付款" value="待付款" />
+                    <el-option label="待发货" value="待发货" />
+                    <el-option label="已发货" value="已发货" />
+                    <el-option label="已完成" value="已完成" />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="下单时间">
+                <el-date-picker v-model="searchForm.dateRange" type="daterange" range-separator="至"
+                    start-placeholder="开始日期" end-placeholder="结束日期" value-format="YYYY-MM-DD" />
+            </el-form-item>
+        </SearchCard>
+
+        <LayoutBox :DataList="orderList" :tableColumn="OrderColumns" title="订单列表" add="新增订单" :loading="loading"
+            @add="handleAddOrder">
+
+            <template #amount="{ row }">
+                <span style="color: #f56c6c;">¥{{ row.amount }}</span>
             </template>
-            <el-table :data="orderList" stripe v-loading="loading">
-                <el-table-column prop="orderNo" label="订单号" width="180" />
-                <el-table-column prop="user" label="买家" />
-                <el-table-column prop="phone" label="手机号" />
-                <el-table-column prop="amount" label="订单金额">
-                    <template #default="{ row }">
-                        <span style="color: #f56c6c;">¥{{ row.amount }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="status" label="状态" width="100">
-                    <template #default="{ row }">
-                        <el-tag :type="getStatusType(row.status)">{{ row.status }}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="payTime" label="支付时间" />
-                <el-table-column label="操作" width="220">
-                    <template #default="{ row }">
-                        <el-button link type="primary" @click="handleDetail(row)">详情</el-button>
-                        <el-button v-if="row.status === '待发货'" link type="success"
-                            @click="handleShip(row)">发货</el-button>
-                        <el-button link type="danger" @click="handleDeleteOrder(row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </el-card>
+
+            <template #status="{ row }">
+                <el-tag :type="getStatusType(row.status)">{{ row.status }}</el-tag>
+            </template>
+
+            <template #actions="{ row }">
+                <el-button link type="primary" @click="handleDetail(row)">详情</el-button>
+                <el-button v-if="row.status === '待发货'" link type="success" @click="handleShip(row)">发货</el-button>
+                <el-button link type="danger" @click="handleDeleteOrder(row)">删除</el-button>
+            </template>
+        </LayoutBox>
 
         <!-- 订单详情弹框 -->
         <el-dialog v-model="detailVisible" title="订单详情" width="600px">

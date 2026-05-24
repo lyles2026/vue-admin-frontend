@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getDistributorList, updateDistributor } from '@/api/distributor'
 import { ElMessage } from 'element-plus'
+import LayoutBox from '@/components/Common/LayoutBox.vue'
+import SearchCard from '@/components/Common/SearchCard.vue'
 
 const { list: distributorList, loading, fetchList } = useList(getDistributorList)
 onMounted(() => fetchList())
@@ -48,70 +50,66 @@ const handleDisable = async (row) => {
     ElMessage({ message: newStatus === '正常' ? '已启用' : '已禁用', type: 'success', center: true })
     fetchList()
 }
+
+const DistributorColumns = [
+    { prop: 'id', label: 'ID', width: 80 },
+    { prop: 'name', label: '姓名' },
+    { prop: 'phone', label: '手机号' },
+    { prop: 'level', label: '分销等级' },
+    { prop: 'totalCommission', label: '累计佣金' },
+    { prop: 'settledCommission', label: '已结算' },
+    { prop: 'pendingCommission', label: '待结算' },
+    { prop: 'status', label: '状态', width: 100 },
+    { type: 'actions', label: '操作', width: 150 }
+]
 </script>
 
 
 <template>
     <div class="page-container">
-        <el-card class="search-card" shadow="never">
-            <el-form :model="searchForm" inline>
-                <el-form-item label="关键词">
-                    <el-input v-model="searchForm.keyword" placeholder="姓名/手机号" clearable />
-                </el-form-item>
-                <el-form-item label="分销等级">
-                    <el-select v-model="searchForm.level" placeholder="请选择" clearable>
-                        <el-option label="一级分销" value="一级分销" />
-                        <el-option label="二级分销" value="二级分销" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="状态">
-                    <el-select v-model="searchForm.status" placeholder="请选择" clearable>
-                        <el-option label="正常" value="正常" />
-                        <el-option label="禁用" value="禁用" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="handleSearch">搜索</el-button>
-                    <el-button @click="handleReset">重置</el-button>
-                </el-form-item>
-            </el-form>
-        </el-card>
 
-        <el-card shadow="never">
-            <el-table :data="distributorList" stripe v-loading="loading">
-                <el-table-column prop="id" label="ID" width="80" />
-                <el-table-column prop="name" label="姓名" />
-                <el-table-column prop="phone" label="手机号" />
-                <el-table-column prop="level" label="分销等级" />
-                <el-table-column prop="totalCommission" label="累计佣金">
-                    <template #default="{ row }">
-                        <span style="color: #f56c6c;">¥{{ row.totalCommission }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="settledCommission" label="已结算">
-                    <template #default="{ row }">
-                        <span style="color: #67c23a;">¥{{ row.settledCommission }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="pendingCommission" label="待结算">
-                    <template #default="{ row }">
-                        <span style="color: #e6a23c;">¥{{ row.pendingCommission }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="status" label="状态" width="100">
-                    <template #default="{ row }">
-                        <el-tag :type="row.status === '正常' ? 'success' : 'danger'">{{ row.status }}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作" width="150">
-                    <template #default="{ row }">
-                        <el-button link type="primary" @click="handleDetail(row)">详情</el-button>
-                        <el-button link type="danger" @click="handleDisable(row)">{{ row.status === '正常' ? '禁用' : '启用'
-                        }}</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </el-card>
+        <SearchCard :searchForm="searchForm" @search="handleSearch" @reset="handleReset">
+            <el-form-item label="关键词">
+                <el-input v-model="searchForm.keyword" placeholder="姓名/手机号" clearable />
+            </el-form-item>
+            <el-form-item label="分销等级">
+                <el-select v-model="searchForm.level" placeholder="请选择" clearable>
+                    <el-option label="一级分销" value="一级分销" />
+                    <el-option label="二级分销" value="二级分销" />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="状态">
+                <el-select v-model="searchForm.status" placeholder="请选择" clearable>
+                    <el-option label="正常" value="正常" />
+                    <el-option label="禁用" value="禁用" />
+                </el-select>
+            </el-form-item>
+        </SearchCard>
+
+        <LayoutBox :DataList="distributorList" :tableColumn="DistributorColumns" title="分销员管理" :loading="loading">
+
+            <template #totalCommission="{ row }">
+                <span style="color: #f56c6c;">¥{{ row.totalCommission }}</span>
+            </template>
+
+            <template #settledCommission="{ row }">
+                <span style="color: #67c23a;">¥{{ row.settledCommission }}</span>
+            </template>
+
+            <template #pendingCommission="{ row }">
+                <span style="color: #e6a23c;">¥{{ row.pendingCommission }}</span>
+            </template>
+
+            <template #status="{ row }">
+                <el-tag :type="row.status === '正常' ? 'success' : 'danger'">{{ row.status }}</el-tag>
+            </template>
+
+            <template #actions="{ row }">
+                <el-button link type="primary" @click="handleDetail(row)">详情</el-button>
+                <el-button link type="danger" @click="handleDisable(row)">{{ row.status === '正常' ? '禁用' : '启用'
+                    }}</el-button>
+            </template>
+        </LayoutBox>
 
         <el-dialog v-model="detailVisible" title="分销员详情" width="600px">
             <el-descriptions :column="2" border v-if="detailData._id">

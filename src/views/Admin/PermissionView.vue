@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useList } from '@/composables/useList'
 import { getPermissionList, addPermission, updatePermission, deletePermission } from '@/api/permission'
 import { ElMessage } from 'element-plus'
+import LayoutBox from '@/components/Common/LayoutBox.vue'
 
 const { list: permissionList, loading, fetchList } = useList(getPermissionList)
 onMounted(() => fetchList())
@@ -44,43 +45,39 @@ const handleSubmit = async () => {
     ElMessage({ message: '保存成功', type: 'success', center: true })
     fetchList()
 }
+
+const PermissionColumns = [
+    { prop: 'name', label: '权限名称' },
+    { prop: 'code', label: '权限标识' },
+    { prop: 'type', label: '类型', width: 100 },
+    { prop: 'path', label: '路径' },
+    { prop: 'parent', label: '父级' },
+    { prop: 'roles', label: '授权角色', width: 180 },
+    { type: 'actions', label: '操作', width: 150 }
+]
 </script>
 
 
 <template>
     <div class="page-container">
-        <el-card shadow="never">
-            <template #header>
-                <div class="card-header">
-                    <span>权限管理</span>
-                    <el-button type="primary" @click="handleAdd">新增权限</el-button>
-                </div>
+
+        <LayoutBox :DataList="permissionList" :tableColumn="PermissionColumns" title="权限管理" add="新增权限"
+            :loading="loading" @add="handleAdd" @edit="handleEdit" @delete="handleDelete">
+
+            <template #type="{ row }">
+                <el-tag :type="row.type === '菜单' ? 'primary' : 'info'">{{ row.type }}</el-tag>
             </template>
 
-            <el-table :data="permissionList" stripe v-loading="loading">
-                <el-table-column prop="name" label="权限名称" />
-                <el-table-column prop="code" label="权限标识" />
-                <el-table-column prop="type" label="类型" width="100">
-                    <template #default="{ row }">
-                        <el-tag :type="row.type === '菜单' ? 'primary' : 'info'">{{ row.type }}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="path" label="路径" />
-                <el-table-column prop="parent" label="父级" />
-                <el-table-column label="授权角色" width="180">
-                    <template #default="{ row }">
-                        <el-tag v-for="r in (row.roles || ['admin'])" :key="r" :type="r === 'admin' ? 'danger' : 'info'"
-                            size="small" style="margin-right:4px">{{ r === 'admin' ? '管理员' : '普通用户' }}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作" width="150">
-                    <template #default="{ row }">
-                        <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-                        <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </el-card>
+            <template #roles="{ row }">
+                <el-tag v-for="r in (row.roles || ['admin'])" :key="r" :type="r === 'admin' ? 'danger' : 'info'"
+                    size="small" style="margin-right:4px">{{ r === 'admin' ? '管理员' : '普通用户' }}</el-tag>
+            </template>
+
+            <template #actions="{ row }">
+                <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+                <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            </template>
+        </LayoutBox>
 
         <el-dialog v-model="dialogVisible" :title="dialogType === 'add' ? '新增权限' : '编辑权限'" width="500px">
             <el-form :model="currentRow" label-width="80px">

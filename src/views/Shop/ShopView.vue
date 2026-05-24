@@ -5,7 +5,8 @@ import { ref, onMounted } from 'vue';
 import { useList } from '@/composables/useList'
 import { getShop, addShop, deleteShop, updateShop } from '@/api/shop';
 import { getCategory } from '@/api/category';
-import ShopList from '@/components/Common/ShopList.vue';
+import LayoutBox from '@/components/Common/LayoutBox.vue'
+import SearchCard from '@/components/Common/SearchCard.vue'
 
 
 
@@ -46,9 +47,6 @@ const handleReset = () => {
 
 const { list: goodsList, loading, fetchList: fetchGoods } = useList(getShop)
 onMounted(() => fetchGoods())
-
-
-const selectedRows = ref([])
 
 const handleConfirm = async (form) => {
     const now = new Date()
@@ -124,69 +122,55 @@ const List = [
     { id: 2, name: 'status', label: '状态' },
 ]
 
+const ShopColumns = [
+    { prop: 'id', label: 'ID', width: 80 },
+    { prop: 'name', label: '商品名称', minWidth: 150 },
+    { prop: 'category', label: '分类', width: 120 },
+    { prop: 'price', label: '价格', width: 120 },
+    { prop: 'stock', label: '库存', width: 100 },
+    { prop: 'status', label: '状态', width: 100 },
+    { prop: 'createTime', label: '创建时间', width: 180 },
+    { type: 'actions', label: '操作', width: 150 }
+]
 </script>
 
 <template>
     <div class="page-container">
         <!-- 搜索区域 -->
-        <el-card class="search-card" shadow="never">
-            <el-form :model="searchForm" inline>
-                <el-form-item label="商品名称">
-                    <el-input v-model="searchForm.name" placeholder="请输入商品名称" clearable />
-                </el-form-item>
-                <el-form-item label="商品分类">
-                    <el-select v-model="searchForm.category" placeholder="请选择分类" clearable>
-                        <el-option v-for="item in shopCategory" :key="item.value" :value="item.name" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="状态">
-                    <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
-                        <el-option v-for="item in shopStatus" :key="item.value" :value="item.name" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="handleSearch">搜索</el-button>
-                    <el-button @click="handleReset">重置</el-button>
-                </el-form-item>
-            </el-form>
-        </el-card>
+        <SearchCard :searchForm="searchForm" @search="handleSearch" @reset="handleReset">
+            <el-form-item label="商品名称">
+                <el-input v-model="searchForm.name" placeholder="请输入商品名称" clearable />
+            </el-form-item>
+            <el-form-item label="商品分类">
+                <el-select v-model="searchForm.category" placeholder="请选择分类" clearable>
+                    <el-option v-for="item in shopCategory" :key="item.value" :value="item.name" />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="状态">
+                <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
+                    <el-option v-for="item in shopStatus" :key="item.value" :value="item.name" />
+                </el-select>
+            </el-form-item>
+        </SearchCard>
 
         <!-- 表格区域 -->
-        <el-card class="table-card" shadow="never">
-            <template #header>
-                <div class="card-header">
-                    <span>商品列表</span>
-                    <el-button type="primary" @click="handleAdd">新增商品</el-button>
-                </div>
+        <LayoutBox :DataList="goodsList" :tableColumn="ShopColumns" title="商品列表" add="新增商品" :loading="loading"
+            @add="handleAdd" @edit="handleEdit" @delete="handleDelete">
+
+            <template #price="{ row }">
+                <span style="color: #f56c6c;">¥{{ row.price }}</span>
             </template>
 
-            <ShopList :goods-list="goodsList" @selection-change="selectedRows = $event">
-                <template #columns>
-                    <el-table-column type="selection" width="55" />
-                    <el-table-column prop="id" label="ID" width="80" />
-                    <el-table-column prop="name" label="商品名称" min-width="150" />
-                    <el-table-column prop="category" label="分类" width="120" />
-                    <el-table-column prop="price" label="价格" width="120">
-                        <template #default="{ row }">
-                            <span style="color: #f56c6c;">¥{{ row.price }}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="stock" label="库存" width="100" />
-                    <el-table-column prop="status" label="状态" width="100">
-                        <template #default="{ row }">
-                            <el-tag :type="row.status === '销售中' ? 'success' : 'info'">{{ row.status }}</el-tag>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="createTime" label="创建时间" width="180" />
-                    <el-table-column label="操作" width="150" fixed="right">
-                        <template #default="{ row }">
-                            <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-                            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
-                        </template>
-                    </el-table-column>
-                </template>
-            </ShopList>
-        </el-card>
+            <template #status="{ row }">
+                <el-tag :type="row.status === '销售中' ? 'success' : 'info'">{{ row.status }}</el-tag>
+            </template>
+
+            <template #actions="{ row }">
+                <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+                <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            </template>
+        </LayoutBox>
+
         <DialogBox :List="List" :type="dialogType" :formData="currentRow" :rules="rules" @confirm="handleConfirm"
             :shopCategory="shopCategory" :shopStatus="shopStatus" :visible="open" @update:visible="open = $event" />
     </div>

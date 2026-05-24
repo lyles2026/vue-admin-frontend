@@ -4,6 +4,7 @@ import { useList } from '@/composables/useList'
 import { addSize, deleteSize, getSize, updateSize } from '@/api/size.js'
 import { getShop } from '@/api/shop'
 import DialogBox from '@/components/Common/DialogBox.vue'
+import LayoutBox from '@/components/Common/LayoutBox.vue'
 
 
 // 规格列表
@@ -75,38 +76,34 @@ const List = [
     { name: 'name', label: '规格名称' },
     { name: 'values', label: '规格值(用逗号分隔)' }
 ]
+
+const SizeColumns = [
+    { prop: 'id', label: 'ID', width: 80 },
+    { prop: 'name', label: '规格名称' },
+    { prop: 'values', label: '规格值' },
+    { prop: 'goodsCount', label: '使用商品数', width: 120 },
+    { type: 'actions', label: '操作', width: 150 }
+]
 </script>
 
 
 <template>
     <div class="page-container">
-        <el-card shadow="never">
-            <template #header>
-                <div class="card-header">
-                    <span>规格管理</span>
-                    <el-button type="primary" @click="handleAdd">新增规格</el-button>
-                </div>
+
+        <LayoutBox :DataList="sizeList" :tableColumn="SizeColumns" title="规格管理" add="新增规格" :loading="loading"
+            @add="handleAdd" @edit="handleEdit" @delete="handleDelete">
+
+            <template #values="{ row }">
+                <el-tag v-for="val in row.values" :key="val" style="margin-right: 5px;">
+                    {{ val }}
+                </el-tag>
             </template>
 
-            <el-table :data="sizeList" stripe>
-                <el-table-column prop="id" label="ID" width="80" />
-                <el-table-column prop="name" label="规格名称" />
-                <el-table-column label="规格值">
-                    <template #default="{ row }">
-                        <el-tag v-for="val in row.values" :key="val" style="margin-right: 5px;">
-                            {{ val }}
-                        </el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="goodsCount" label="使用商品数" width="120" />
-                <el-table-column label="操作" width="150">
-                    <template #default="{ row }">
-                        <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-                        <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </el-card>
+            <template #actions="{ row }">
+                <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+                <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            </template>
+        </LayoutBox>
 
         <dialog-box :visible="open" :List="List" @confirm="handleSubmit" :type="dialogType" :formData="currentRow"
             @update:visible="open = $event" />

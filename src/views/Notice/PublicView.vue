@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useList } from '@/composables/useList'
 import { getNoticeList, addNotice, updateNotice, deleteNotice } from '@/api/notice'
 import { ElMessage } from 'element-plus'
+import LayoutBox from '@/components/Common/LayoutBox.vue'
 
 const { list: noticeList, loading, fetchList } = useList(getNoticeList)
 onMounted(() => fetchList())
@@ -54,38 +55,34 @@ const handleSubmit = async () => {
     ElMessage({ message: '保存成功', type: 'success', center: true })
     fetchList()
 }
+
+const NoticeColumns = [
+    { prop: 'id', label: 'ID', width: 80 },
+    { prop: 'title', label: '标题' },
+    { prop: 'type', label: '类型', width: 100 },
+    { prop: 'status', label: '状态', width: 100 },
+    { prop: 'sort', label: '排序', width: 80 },
+    { prop: 'createTime', label: '创建时间' },
+    { type: 'actions', label: '操作', width: 150 }
+]
 </script>
 
 
 <template>
     <div class="page-container">
-        <el-card shadow="never">
-            <template #header>
-                <div class="card-header">
-                    <span>公告管理</span>
-                    <el-button type="primary" @click="handleAdd">新增公告</el-button>
-                </div>
+
+        <LayoutBox :DataList="noticeList" :tableColumn="NoticeColumns" title="公告管理" add="新增公告" :loading="loading"
+            @add="handleAdd" @edit="handleEdit" @delete="handleDelete">
+
+            <template #status="{ row }">
+                <el-tag :type="row.status === '显示' ? 'success' : 'info'">{{ row.status }}</el-tag>
             </template>
 
-            <el-table :data="noticeList" stripe v-loading="loading">
-                <el-table-column prop="id" label="ID" width="80" />
-                <el-table-column prop="title" label="标题" />
-                <el-table-column prop="type" label="类型" width="100" />
-                <el-table-column prop="status" label="状态" width="100">
-                    <template #default="{ row }">
-                        <el-tag :type="row.status === '显示' ? 'success' : 'info'">{{ row.status }}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="sort" label="排序" width="80" />
-                <el-table-column prop="createTime" label="创建时间" />
-                <el-table-column label="操作" width="150">
-                    <template #default="{ row }">
-                        <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-                        <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </el-card>
+            <template #actions="{ row }">
+                <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+                <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            </template>
+        </LayoutBox>
 
         <el-dialog v-model="dialogVisible" :title="dialogType === 'add' ? '新增公告' : '编辑公告'" width="600px">
             <el-form :model="currentRow" label-width="80px">
