@@ -21,11 +21,13 @@ const fetchList = async () => {
 }
 onMounted(() => fetchList())
 
+const today = new Date()
+const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 const stats = computed(() => ({
     totalCommission: commissionList.value.reduce((s, i) => s + (i.commission || 0), 0),
     settledCommission: commissionList.value.filter(i => i.status === '已结算').reduce((s, i) => s + (i.commission || 0), 0),
     pendingCommission: commissionList.value.filter(i => i.status === '待结算').reduce((s, i) => s + (i.commission || 0), 0),
-    todayCommission: 0,
+    todayCommission: commissionList.value.filter(i => i.settleTime?.startsWith(todayStr)).reduce((s, i) => s + (i.commission || 0), 0),
 }))
 
 const searchForm = ref({

@@ -107,6 +107,18 @@ const router = createRouter({
           component: () => import('@/views/Distribution/CommissionView.vue'),
           meta: { title: '佣金管理' }
         },
+        {
+          path: '/Notice/gallery',
+          name: 'notice-gallery',
+          component: () => import('@/views/Notice/GalleryView.vue'),
+          meta: { title: '图库管理' }
+        },
+        {
+          path: '/Notice/public',
+          name: 'notice-public',
+          component: () => import('@/views/Notice/PublicView.vue'),
+          meta: { title: '公告管理' }
+        }
       ]
     },
     {
